@@ -40,6 +40,17 @@ app.post('/todos', (req, res) => {
 
 })
 
+//get all todos
+//Using promieses for async. First is if successful. Second handles errors.
+app.get('/todos', (req, res) => {
+    Todo.find().then( (todos) => {
+        //rather than array, return an object - more flexible in approach
+        res.send({todos});
+    }, (e) => {
+        res.status(400).send(e);
+    })
+})
+
 app.listen(3000, () => {
     console.log('Started on Port 3000')
 });
