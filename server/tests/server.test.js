@@ -1,93 +1,110 @@
-//testing setup
+//testing setup - expect is the assertion frame work
+//request allows us to text routes
 const expect = require('expect');
 const request = require('supertest');
 
 //es6 destructuring to create vars
 const {app} = require('./../server');
-const {Todo} = require('./../models/todo');
+const {Session} = require('./../models/session');
 
+const testSessions = [
+    {
+        "startTime" : "123123123",
+        "tide" : "low",
+        "weather" : "sunny",
+        "location" : "test1",
+        "lat" : "5.000303",
+        "long" : "121.123123"
+    }
+    ,{
+        "startTime" : "123123123",
+        "tide" : "low",
+        "weather" : "sunny",
+        "location" : "test2",
+        "lat" : "5.000303",
+        "long" : "121.123123"
+    }]
 
-//Seed data to add to the db. Allows us to add data, but also make it consistent.
-const todos = [{
-    text: "First test todo"
-}, {
-    text: "Second test todo"
-}];
-
-
-//this test method runds before each test. Currently we are dropping the db before each test and adding seed data
+//this test method runs before each test. Currently we are dropping the collection before each test and adding seed data
 beforeEach((done)=>{
-    Todo.remove({}).then( () => {
-        return Todo.insertMany(todos)
-    }).then(()=>done());
-})
+    Session.remove({}).then( () => {
+        return Session.insertMany(testSessions);
+    }).then( ()=> done()).catch((e) => done(e));
+});
 
-describe('POST /todos', () => {
-    it('should create a new todo', (done) =>{
-        var text = "testing test todo"
+describe('POST /session', () => {
 
-        //using supertest to post a todo. checking port and body
+    const testSession = {
+        "startTime" : "123123123",
+        "tide" : "low",
+        "weather" : "sunny",
+        "location" : "testing",
+        "lat" : "5.000303",
+        "long" : "121.123123"
+    }
+
+    it('should create a new session', (done) => {
+
+        //post a session, expect 200 response and start time to match
         request(app)
-            .post('/todos')
-            .send({text})
+            .post('/session')
+            .send(testSession)
             .expect(200)
             .expect((res) => {
-                expect(res.body.text).toBe(text);
-
-
-            //then checking the database.
-            //currently checking for one result. Would this apply to us?
-            }).end((err, res) => {
-                
+                expect(res.body.location).toBe("testing");
+            })
+            //return if error
+            .end((err, res) => {
                 if (err) {
                     return done(err);
                 }
-
-                Todo.find({text}).then((todos)=>{
-                    expect(todos.length).toBe(1);
-                    expect(todos[0].text).toBe(text);
-                    done();
-                }).catch((e)=>done(e));
-
-            });
-    });
-
-
-    //test to check for nothing being submitted
-    it('should not not create an empty to do', (done) => {
-
-        request(app)
-
-            //check for 400 on blank object
-            .post('/todos')
-            .send({})
-            .expect(400)
-            .end( (err, res) => {
-                if (err) {
-                    return done(err);
-                } 
-
-                Todo.find().then((todos) => {
-                    expect(todos.length).toBe(2)
+                //check database to see is a record exists - test based on no records intially present/
+                Session.find().then((sessions) => {
+                    //console.log(sessions);
+                    expect(sessions.length).toBe(3);
+                    expect(sessions[2].location).toBe("testing");
+                    //done must be called!
                     done();
                 }).catch((e) => done(e));
 
             });
     });
+
+    //remove this test.
+    //this submits an empty object. 
+    //it is currently passing as a new object is created each time /session is hit.
+    //think about how the model is set up before adjusting this
+    it('should not create a session with bad data', (done) => {
+        
+                //post a session, expect 200 response and start time to match
+                request(app)
+                    .post('/session')
+                    .send({})
+                    .expect(200)
+                    //return if error
+                    .end((err, res) => {
+                        if (err) {
+                            return done(err);
+                        }
+                        //check database to see is a record exists - test based on no records intially present/
+                        Session.find().then((sessions) => {
+                            expect(sessions.length).toBe(3);
+                            //done must be called!
+                            done();
+                        }).catch((e) => done(e));
+        
+                    });
+            });
 });
 
-
-describe('GET /todos', () => {
-    
-    it('should get all todos', (done) => {
-
+//get all sessions
+describe('GET /session', () => {
+    it('should get all sessions', (done) => {
         request(app)
-            .get('/todos')
+            .get('/sessions')
             .expect(200)
-            .expect((res) => {
-                expect(res.body.todos.length).toBe(2);
+            .expect( (res) => {
+                expect(res.body.sessions.length).toBe(2);
             }).end(done);
-        })
+    });
 });
-
-

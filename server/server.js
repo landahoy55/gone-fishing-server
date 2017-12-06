@@ -1,33 +1,82 @@
 //library imports
-var express = require('express');
-var bodyParser = require('body-parser');
+const express = require('express');
+const bodyParser = require('body-parser');
 
 
 //Local imports
 //using ES6 destructuring to create the var.
 
 //connection
-var {mongoose} = require('./db/mongoose.js');
+const {mongoose} = require('./db/mongoose.js');
 //models
-var {Todo} = require('./models/todo.js');
-var {User} = require('./models/user.js');
+const {Todo} = require('./models/todo.js');
+//const {User} = require('./models/user.js');
+
+//bring in models
+//const {Catch} = require('./models/catch.js');
+const {Session} = require('./models/session.js');
+
 
 //set up the app and the middleware - body parser returns a json object
-var app = express();
+const app = express();
 app.use(bodyParser.json());
 
-//URL config for creating a new todo. Posting.
-app.post('/todos', (req, res) => {
+//Get all sessions
+//Using promises for async. First is if successful. Second handles errors.
+app.get('/sessions', (req, res) => {
+    Session.find().then( (sessions) => {
+        //rather than array, return an object - more flexible in approach
+        res.send({sessions});
+    }, (e) => {
+        res.status(400).send(e);
+    });
+})
+
+//Get one session by id - 5a245b3104498d4271bd96e7
+//adjust to body rather than params.
+app.get('/sessions/:id', (req, res) => {
+    Session.findById(req.params.id).then( (session) => {
+        //rather than array, return an object - more flexible in approach
+        res.send({session});
+    }, (e) => {
+        res.status(400).send(e);
+    });
+})
+
+//Get all by location - Torquay
+//adjust to body rather than params.
+app.get('/locations/:id', (req, res) => {
+
+    let local = req.params.id
+
+    Session.find({location:local}).then( (session) => {
+        res.send(session);
+    }, (e) => {
+        res.status(400).send(e);
+    });
+})
+
+//Post session
+app.post('/session', (req, res) => {
     console.log(req.body);
 
+    let currDate = new Date();
+
     //creating a request object from the request
-    var todo = new Todo({
-        text: req.body.text
+    var session = new Session({
+        startTime: currDate,
+        endTime: req.body.endTime,
+        tide: req.body.tide,
+        weather: req.body.weather,
+        location: req.body.location,
+        lat: req.body.lat,
+        long: req.body.long,
+        didCatch: req.body.didCatch,
+        quantity: req.body.quantity
     });
 
     //saving the object to the db
-    todo.save().then( (doc) => {
-        
+    session.save().then( (doc) => {
         //send back the response to the user.
         res.send(doc)
 
@@ -35,26 +84,76 @@ app.post('/todos', (req, res) => {
 
         //nice little chain.
         res.status(400).send(err);
-
+    
     });
 
+})
+
+//update quantity
+app.put('/session/quantity', (req, res) => {
+    console.log(req.body.id);
+    let id = {'_id':req.body.id}
+    let quantity = {'quantity': req.body.quantity}
+
+    Session.findOneAndUpdate(id, quantity, {upsert:true}, function(err, doc){
+        if (err) { 
+            return res.send(500, { error: err }); 
+        }
+        //response is original document.
+        return res.send(doc);
+    });
+})
+
+//update didcatch
+app.put('/session/didcatch', (req, res) => {
+    console.log(req.body.id);
+    let id = {'_id':req.body.id}
+    let didcatch = {'didCatch': req.body.didcatch}
+
+    Session.findOneAndUpdate(id, didcatch, {upsert:true}, function(err, doc){
+        if (err) { 
+            return res.send(500, { error: err }); 
+        }
+        //response is original document.
+        return res.send(doc);
+    });
+})
+
+//update endtime
+app.put('/session/endtime', (req, res) => {
+    //console.log(req.body.id);
+    let id = {'_id':req.body.id}
+    //set date here.
+    let currDate = new Date();
+    let endtime = {'endTime': currDate};
+
+    Session.findOneAndUpdate(id, endtime, {upsert:true}, function(err, doc){
+        if (err) { 
+            return res.send(500, { error: err }); 
+        }
+        //response is original document.
+        return res.send(doc);
+    });
 })
 
 //get all todos
 //Using promieses for async. First is if successful. Second handles errors.
-app.get('/todos', (req, res) => {
-    Todo.find().then( (todos) => {
-        //rather than array, return an object - more flexible in approach
-        res.send({todos});
-    }, (e) => {
-        res.status(400).send(e);
-    });
-})
+// app.get('/todos', (req, res) => {
+//     Todo.find().then( (todos) => {
+//         //rather than array, return an object - more flexible in approach
+//         res.send({todos});
+//     }, (e) => {
+//         res.status(400).send(e);
+//     });
+// })
 
 app.listen(3000, () => {
     console.log('Started on Port 3000')
 });
 
+//export to use in testing 
 module.exports = {app};
+
+
 
 
