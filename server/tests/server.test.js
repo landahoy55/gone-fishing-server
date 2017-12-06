@@ -1,5 +1,5 @@
 //testing setup - expect is the assertion frame work
-//request allows us to text routes
+//supertest allows us to text routes
 const expect = require('expect');
 const request = require('supertest');
 
@@ -121,7 +121,53 @@ describe('GET /session/:id', () => {
             .get(`/sessions/${testSessions[0]._id.toHexString()}`)
             .expect(200)
             .expect((res) => {
+                console.log(res.body);
                 expect(res.body.session.location).toBe(testSessions[0].location);
             }).end(done);
     });
+});
+
+
+describe('DELETE /sessions/:id', () => {
+    it('should remove a session', (done) => {
+        var id = testSessions[1]._id.toHexString();
+
+        request(app)
+            .delete(`/sessions/${id}`)
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.session._id).toBe(id)
+            })
+            .end((err, res) => {
+                if (err) {
+                    return done(err);
+                }
+            
+            //queries db for session, should not exist.
+            Session.findById(id).then((session) => {
+                expect(session).toBeFalsy();
+                done();
+            }).catch((e) => done(e));
+        });
+    });
+
+    //todo 404s
+});
+
+describe('PUT /session/endtime', () => {
+    it('should update the endtime', (done) => {
+
+        var id = testSessions[1]._id.toHexString();
+
+        request(app)
+            .put('/session/endtime')
+            .send({"id":id})
+            .expect(200)
+            .expect( (res) => {
+                console.log(res.body);
+                expect(res.body.endTime).toBeTruthy();
+                done();
+            }).catch((e) => done(e));
+    });
+
 });

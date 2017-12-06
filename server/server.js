@@ -1,24 +1,28 @@
+//env set up - port and db
+require('./config/config');
+
 //library imports
 const express = require('express');
 const bodyParser = require('body-parser');
 
-
 //Local imports
 //using ES6 destructuring to create the var.
-
 //connection
 const {mongoose} = require('./db/mongoose.js');
 //models
-const {Todo} = require('./models/todo.js');
-//const {User} = require('./models/user.js');
-
 //bring in models
 //const {Catch} = require('./models/catch.js');
 const {Session} = require('./models/session.js');
 
+//to access ObjectID methods
+const {ObjectID} = require('mongodb');
+
 
 //set up the app and the middleware - body parser returns a json object
 const app = express();
+
+const port = process.env.PORT;
+
 app.use(bodyParser.json());
 
 //Get all sessions
@@ -63,7 +67,8 @@ app.get('/locations/:id', (req, res) => {
 app.post('/session', (req, res) => {
     console.log(req.body);
 
-    let currDate = new Date();
+    //getTime returns epoch
+    let currDate = new Date().getTime();
 
     //creating a request object from the request
     var session = new Session({
@@ -127,10 +132,10 @@ app.put('/session/endtime', (req, res) => {
     //console.log(req.body.id);
     let id = {'_id':req.body.id}
     //set date here.
-    let currDate = new Date();
+    let currDate = new Date().getTime();
     let endtime = {'endTime': currDate};
 
-    Session.findOneAndUpdate(id, endtime, {upsert:true}, function(err, doc){
+    Session.findOneAndUpdate(id, endtime, {new: true}, function(err, doc){
         if (err) { 
             return res.send(500, { error: err }); 
         }
@@ -139,19 +144,34 @@ app.put('/session/endtime', (req, res) => {
     });
 })
 
-//get all todos
-//Using promieses for async. First is if successful. Second handles errors.
-// app.get('/todos', (req, res) => {
-//     Todo.find().then( (todos) => {
-//         //rather than array, return an object - more flexible in approach
-//         res.send({todos});
-//     }, (e) => {
-//         res.status(400).send(e);
-//     });
-// })
+//Remove session
+app.delete('/sessions/:id', (req, res) => {
+    //get id
+    var id = req.params.id;
 
-app.listen(3000, () => {
-    console.log('Started on Port 3000')
+    //throw back 404 if ID is not valid
+    if(!ObjectID.isValid(id)) {
+        return res.status(404).send()
+    }
+
+    Session.findByIdAndRemove(id).then((session) => {
+        //400 is doesn't exist
+        if (!session) {
+            return res.status(404).send()
+        }
+
+        res.send({session})
+
+    //need to catch errors as part of promises
+    }).catch((e) => {
+        res.status(400).send();
+    });
+
+});
+
+
+app.listen(port, () => {
+    console.log(`Started on Port ${port}`);
 });
 
 //export to use in testing 
