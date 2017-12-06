@@ -3,12 +3,16 @@
 const expect = require('expect');
 const request = require('supertest');
 
+//to get at object id
+const {ObjectID} = require('mongodb');
+
 //es6 destructuring to create vars
 const {app} = require('./../server');
 const {Session} = require('./../models/session');
 
 const testSessions = [
     {
+        _id: new ObjectID(),
         "startTime" : "123123123",
         "tide" : "low",
         "weather" : "sunny",
@@ -17,6 +21,7 @@ const testSessions = [
         "long" : "121.123123"
     }
     ,{
+        _id: new ObjectID(),
         "startTime" : "123123123",
         "tide" : "low",
         "weather" : "sunny",
@@ -105,6 +110,18 @@ describe('GET /session', () => {
             .expect(200)
             .expect( (res) => {
                 expect(res.body.sessions.length).toBe(2);
+            }).end(done);
+    });
+});
+
+describe('GET /session/:id', () => {
+    it('should return test session', (done) => {
+        request(app)
+            //template strings to get at test sessions above
+            .get(`/sessions/${testSessions[0]._id.toHexString()}`)
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.session.location).toBe(testSessions[0].location);
             }).end(done);
     });
 });

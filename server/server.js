@@ -41,14 +41,17 @@ app.get('/sessions/:id', (req, res) => {
     }, (e) => {
         res.status(400).send(e);
     });
+
+    //todo:
+    //add 404 errors and testing
+
 })
 
 //Get all by location - Torquay
 //adjust to body rather than params.
 app.get('/locations/:id', (req, res) => {
 
-    let local = req.params.id
-
+    let local = req.params.id;
     Session.find({location:local}).then( (session) => {
         res.send(session);
     }, (e) => {
