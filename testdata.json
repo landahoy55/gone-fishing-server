@@ -1,0 +1,11 @@
+//x5
+db.catchs.insert({"time":"123234345","quantity":3})
+db.catchs.insert({"time":"234234354","quantity":4})
+db.catchs.insert({"time":"234243345","quantity":5})
+db.catchs.insert({"time":"243245356","quantity":2})
+db.catchs.insert({"time":"212345345","quantity":3})
+
+//x2
+db.sessions.insert({"startTime":"123123123","endTime":"123123123","tide":"Low","weather":"Sunny","location":"Torquay","lat":"5.000303","long":"121.123123","didCatch":"True","quantity":4})
+db.sessions.insert({"startTime":"243234234","endTime":"345354345","tide":"High","weather":"Rain","location":"Plymouth","lat":"4.000303","long":"120.123145","didCatch":"True","quantity":6})
+

@@ -4,6 +4,7 @@ require('./config/config');
 //library imports
 const express = require('express');
 const bodyParser = require('body-parser');
+const _ = require('lodash');
 
 //Local imports
 //using ES6 destructuring to create the var.
@@ -13,7 +14,7 @@ const {mongoose} = require('./db/mongoose.js');
 //bring in models
 //const {Catch} = require('./models/catch.js');
 const {Session} = require('./models/session.js');
-
+const {User} = require('./models/user.js');
 //to access ObjectID methods
 const {ObjectID} = require('mongodb');
 
@@ -65,7 +66,7 @@ app.get('/locations/:id', (req, res) => {
 
 //Post session
 app.post('/session', (req, res) => {
-    console.log(req.body);
+    //console.log(req.body);
 
     //getTime returns epoch
     let currDate = new Date().getTime();
@@ -167,6 +168,28 @@ app.delete('/sessions/:id', (req, res) => {
         res.status(400).send();
     });
 
+});
+
+
+
+//Signup users
+//POST /Users
+app.post('/users', (req, res) => {
+
+    //using lodash to take specific bit of the request. Different approach to creating a session.
+    var reqBody = _.pick(req.body, ['email', 'password']);
+    var user = new User(reqBody);
+
+    user.save().then(() => {
+        return user.createAuthTokens()
+        //res.send(user);
+    }).then((token) => {
+        //http header, prefix with x means custom
+        res.header('x-auth', token).send(user)
+    }).catch((e) => {
+        console.log('400 error on signup')
+        res.status(400).send(e);
+    })
 });
 
 
