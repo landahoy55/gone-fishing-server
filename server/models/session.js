@@ -5,18 +5,17 @@ var mongoose = require('mongoose');
 //var ObjectId = mongoose.Schema.Types.ObjectId;
 
 //passing an object into the title property containing the type and a default. Required is also commonly used.
-//products contains an array of the Product objects created in the other collection -  referencing the object ID. Rather than a copy of the object
 var Session = mongoose.model('Session',{
   
-  //start time 
-  startTime: {
-    type: String,
+  //sessionStart time
+  sessionStart: {
+    type: Number,
     required: true,
     trim: true
   },
   //end time 
-  endTime: {
-    type: String,
+  sessionEnd: {
+    type: Number,
     required: false,
     trim: true
   },
@@ -27,8 +26,8 @@ var Session = mongoose.model('Session',{
     trim: true,
     default: "Unknown"
   },
-  //weather
-  weather: {
+  //weatherDesc
+  weatherDesc: {
     type: String,
     required: false,
     trim: true,
@@ -43,13 +42,13 @@ var Session = mongoose.model('Session',{
   },
   //lat
   lat: {
-    type: String,
+    type: Number,
     required: false,
     trim: true
   },
   //long
   long: {
-    type: String,
+    type: Number,
     required: false,
     trim: true
   },
@@ -59,9 +58,17 @@ var Session = mongoose.model('Session',{
     default: false,
     required: false
   },
-  quantity:{
+  numberCaught:{
     type: Number,
     default: 0
+  },
+  temp:{
+    type: String,
+    default: '10'
+  },
+  note:{
+    type: String,
+    default: ''
   }
 });
 

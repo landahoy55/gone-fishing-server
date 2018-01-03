@@ -13,21 +13,25 @@ const {Session} = require('./../models/session');
 const testSessions = [
     {
         _id: new ObjectID(),
-        "startTime" : "123123123",
+        "sessionStart" : 123123123,
+        "sessionEnd" : 123123423,
         "tide" : "low",
-        "weather" : "sunny",
+        "weatherDesc" : "sunny",
         "location" : "test1",
-        "lat" : "5.000303",
-        "long" : "121.123123"
+        "lat" : 5.000303,
+        "long" : 121.123123,
+        "numberCaught": 3
     }
     ,{
         _id: new ObjectID(),
-        "startTime" : "123123123",
+        "sessionStart" : 123123123,
+        "sessionEnd" : 123123423,
         "tide" : "low",
-        "weather" : "sunny",
+        "weatherDesc" : "sunny",
         "location" : "test2",
-        "lat" : "5.000303",
-        "long" : "121.123123"
+        "lat" : 5.000303,
+        "long" : 121.123123,
+        "numberCaught": 4
     }]
 
 //this test method runs before each test. Currently we are dropping the collection before each test and adding seed data
@@ -40,12 +44,14 @@ beforeEach((done)=>{
 describe('POST /session', () => {
 
     const testSession = {
-        "startTime" : "123123123",
+        "sessionStart" : 123123123,
+        "sessionEnd" : 123123423,
         "tide" : "low",
-        "weather" : "sunny",
+        "weatherDesc" : "sunny",
         "location" : "testing",
-        "lat" : "5.000303",
-        "long" : "121.123123"
+        "lat" : 5.000303,
+        "long" : 121.123123,
+        "numberCaught": 4
     }
 
     it('should create a new session', (done) => {

@@ -15,17 +15,36 @@ const {mongoose} = require('./db/mongoose.js');
 //const {Catch} = require('./models/catch.js');
 const {Session} = require('./models/session.js');
 const {User} = require('./models/user.js');
+const {authenticate} = require('./middle/auth.js');
+
 //to access ObjectID methods
 const {ObjectID} = require('mongodb');
 
 
+//******socket.io - rather than using express apps interpretation of http, sockets.io needs to run directy via http
+const http = require('http');
+const socketIo = require('socket.io');
+
 //set up the app and the middleware - body parser returns a json object
 const app = express();
-
+//dev and deploy
 const port = process.env.PORT;
 
-app.use(bodyParser.json());
+//************ socket.io config - remember to listen on server rather than app...*/
+const server = http.createServer(app);
+const io = socketIo(server);
 
+
+//Allow CORS on all domains and localhosts
+app.all('/*', function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "X-Requested-With, Content-Type, Accept");
+    res.header("Access-Control-Allow-Methods", "POST, GET, DELETE");
+    next();
+});
+
+
+app.use(bodyParser.json());
 //Get all sessions
 //Using promises for async. First is if successful. Second handles errors.
 app.get('/sessions', (req, res) => {
@@ -46,16 +65,13 @@ app.get('/sessions/:id', (req, res) => {
     }, (e) => {
         res.status(400).send(e);
     });
-
     //todo:
     //add 404 errors and testing
-
 })
 
 //Get all by location - Torquay
 //adjust to body rather than params.
 app.get('/locations/:id', (req, res) => {
-
     let local = req.params.id;
     Session.find({location:local}).then( (session) => {
         res.send(session);
@@ -73,15 +89,17 @@ app.post('/session', (req, res) => {
 
     //creating a request object from the request
     var session = new Session({
-        startTime: currDate,
-        endTime: req.body.endTime,
+        sessionStart: req.body.sessionStart,
+        sessionEnd: req.body.sessionEnd,
         tide: req.body.tide,
-        weather: req.body.weather,
+        weatherDesc: req.body.weatherDesc,
         location: req.body.location,
         lat: req.body.lat,
         long: req.body.long,
-        didCatch: req.body.didCatch,
-        quantity: req.body.quantity
+        numberCaught: req.body.numberCaught,
+        note: req.body.note,
+        temp: req.body.temp,
+        didCatch: req.body.didCatch
     });
 
     //saving the object to the db
@@ -192,12 +210,28 @@ app.post('/users', (req, res) => {
     })
 });
 
+//testing authentication - returns user details
+//authenticate is the middleware, created in auth.js
+app.get('/users/me', authenticate, (req, res) => {
+    res.send(req.user);
+}); 
 
-app.listen(port, () => {
+
+io.on('connection', (socket) => {
+    socket.on('message', (body) => {
+        socket.broadcast.emit('message', {
+            body: body,
+            from: socket.id.slice(8)
+        });
+    })
+})
+
+
+server.listen(port, () => {
     console.log(`Started on Port ${port}`);
 });
 
-//export to use in testing 
+//export to use in testing ************ does this need to be server to?
 module.exports = {app};
 
 

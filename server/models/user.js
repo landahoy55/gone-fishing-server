@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs')
+
 
 //todo: add user name etc
 
@@ -49,6 +51,55 @@ UserSchema.methods.createAuthTokens = function() {
         return token;
     });
 }
+
+//hashing middleware. Runs before 'save'
+//not using arrow function - need this binding
+//next must be called in the function
+UserSchema.pre('save', function (next) {
+    
+    var user = this;
+
+    //check to see if hash is modified field. Avoid double hash
+    if (user.isModified('password')) {
+        bcrypt.genSalt(10, (err, salt) => {
+            bcrypt.hash(user.password, salt, (err, hash) => {
+                user.password = hash;
+                next();
+            });
+        });
+    } else {
+        next();
+    }
+    
+});
+
+//static method to check user status
+UserSchema.statics.findByToken = function(token) {
+    
+    //bind to model not inst
+    var User = this;
+    var decoded;
+
+    //try catch block. Like Swift. Check for error, do something if error appears.
+    try {
+        decoded = jwt.verify(token, 'salty')
+    } catch (e) {
+        //handle rejection
+        return new Promise((resolve, reject) => {
+            reject();
+        });
+    }
+
+    //promise return - get at with .then. returns matching user
+    return User.findOne({
+        '_id': decoded._id,
+        'tokens.token': token,
+        'tokens.access':'auth'
+    });
+
+};
+
+
 
 var User = mongoose.model('User', UserSchema );
 
