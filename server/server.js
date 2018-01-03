@@ -209,7 +209,7 @@ app.post('/users', (req, res) => {
         res.status(400).send(e);
     })
 });
-
+//
 //testing authentication - returns user details
 //authenticate is the middleware, created in auth.js
 app.get('/users/me', authenticate, (req, res) => {
