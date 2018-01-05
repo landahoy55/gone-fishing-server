@@ -1,5 +1,7 @@
 //env set up - port and db
 require('./config/config');
+require('synaptic');
+const inputData = require('./synapticTools/synapticFunc');
 
 //library imports
 const express = require('express');
@@ -9,16 +11,16 @@ const _ = require('lodash');
 //Local imports
 //using ES6 destructuring to create the var.
 //connection
-const {mongoose} = require('./db/mongoose.js');
+const { mongoose } = require('./db/mongoose.js');
 //models
 //bring in models
 //const {Catch} = require('./models/catch.js');
-const {Session} = require('./models/session.js');
-const {User} = require('./models/user.js');
-const {authenticate} = require('./middle/auth.js');
+const { Session } = require('./models/session.js');
+const { User } = require('./models/user.js');
+const { authenticate } = require('./middle/auth.js');
 
 //to access ObjectID methods
-const {ObjectID} = require('mongodb');
+const { ObjectID } = require('mongodb');
 
 
 //******socket.io - rather than using express apps interpretation of http, sockets.io needs to run directy via http
@@ -80,13 +82,31 @@ app.get('/locations/:id', (req, res) => {
     });
 })
 
+
+//Get synapticjs assessment - liklihood of catching
+app.post('/probability', (req, res) => {
+    
+    let month = req.body.month;
+    let tide = req.body.tide;
+    let location = req.body.location;
+    let temp = req.body.temp;
+
+    //this code in express app.
+    // 3, 'Low', 'Exmouth', 8
+    inputData(month, tide, location, temp).then((fromResolve) => {
+        res.send(fromResolve);
+    }).catch((formReject) => {
+        res.send(formReject)
+    });
+    
+});
+
+
 //Post session
 app.post('/session', (req, res) => {
-    //console.log(req.body);
-
+   
     //getTime returns epoch
-    let currDate = new Date().getTime();
-
+    let currDate = new Date().getTime(); //redundant - passed from front end
     //creating a request object from the request
     var session = new Session({
         sessionStart: req.body.sessionStart,
