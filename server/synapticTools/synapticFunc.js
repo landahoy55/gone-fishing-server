@@ -17,10 +17,10 @@ trainer.train(trainingData,{
 //normalised functions
 const tide = (inputTide) => {
   switch (inputTide) {
-    case 'High':
+    case 'high':
         return normalisedTide = 1;
         break;
-    case 'Low':
+    case 'low':
         return normalisedTide = 0;
         break;
   }
