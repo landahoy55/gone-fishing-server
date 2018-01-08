@@ -5,7 +5,10 @@ const inputData = require('./synapticTools/synapticFunc');
 
 //library imports
 const express = require('express');
+
+//widely used middleware that allows access to req.body, and simplified JSON manpulation
 const bodyParser = require('body-parser');
+//Widely used utility functions
 const _ = require('lodash');
 
 //Local imports
@@ -215,6 +218,7 @@ app.delete('/sessions/:id', (req, res) => {
 app.post('/users', (req, res) => {
 
     //using lodash to take specific bit of the request. Different approach to creating a session.
+    //picks off just the two properties of the body.
     var reqBody = _.pick(req.body, ['email', 'password']);
     var user = new User(reqBody);
 
@@ -241,12 +245,12 @@ io.on('connection', (socket) => {
     socket.on('message', (body) => {
         socket.broadcast.emit('message', {
             body: body,
-            from: socket.id.slice(8)
+            from: socket.id.slice(3)
         });
     })
 })
 
-
+//socket.io requires server.listen rather than app.listen
 server.listen(port, () => {
     console.log(`Started on Port ${port}`);
 });
