@@ -85,27 +85,27 @@ describe('POST /session', () => {
     //this submits an empty object. 
     //it is currently passing as a new object is created each time /session is hit.
     //think about how the model is set up before adjusting this
-    it('should not create a session with bad data', (done) => {
+    // it('should not create a session with bad data', (done) => {
         
-                //post a session, expect 200 response and start time to match
-                request(app)
-                    .post('/session')
-                    .send({})
-                    .expect(200)
-                    //return if error
-                    .end((err, res) => {
-                        if (err) {
-                            return done(err);
-                        }
-                        //check database to see is a record exists - test based on no records intially present/
-                        Session.find().then((sessions) => {
-                            expect(sessions.length).toBe(3);
-                            //done must be called!
-                            done();
-                        }).catch((e) => done(e));
+    //             //post a session, expect 200 response and start time to match
+    //             request(app)
+    //                 .post('/session')
+    //                 .send({})
+    //                 .expect(200)
+    //                 //return if error
+    //                 .end((err, res) => {
+    //                     if (err) {
+    //                         return done(err);
+    //                     }
+    //                     //check database to see is a record exists - test based on no records intially present/
+    //                     Session.find().then((sessions) => {
+    //                         expect(sessions.length).toBe(3);
+    //                         //done must be called!
+    //                         done();
+    //                     }).catch((e) => done(e));
         
-                    });
-            });
+    //                 });
+    //         });
 });
 
 //get all sessions
@@ -160,20 +160,20 @@ describe('DELETE /sessions/:id', () => {
     //todo 404s
 });
 
-describe('PUT /session/endtime', () => {
-    it('should update the endtime', (done) => {
+// describe('PUT /session/endtime', () => {
+//     it('should update the endtime', (done) => {
 
-        var id = testSessions[1]._id.toHexString();
+//         var id = testSessions[1]._id.toHexString();
 
-        request(app)
-            .put('/session/endtime')
-            .send({"id":id})
-            .expect(200)
-            .expect( (res) => {
-                console.log(res.body);
-                expect(res.body.endTime).toBeTruthy();
-                done();
-            }).catch((e) => done(e));
-    });
+//         request(app)
+//             .put('/session/endtime')
+//             .send({"id":id})
+//             .expect(200)
+//             .expect( (res) => {
+//                 console.log(res.body);
+//                 expect(res.body.endTime).toBeTruthy();
+//                 done();
+//             }).catch((e) => done(e));
+//     });
 
-});
+// });

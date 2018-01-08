@@ -32,7 +32,7 @@ const socketIo = require('socket.io');
 
 //set up the app and the middleware - body parser returns a json object
 const app = express();
-//dev and deploy
+//dev and deploy - mlab database is stored in heroku process.env.port
 const port = process.env.PORT;
 
 //************ socket.io config - remember to listen on server rather than app...*/
@@ -94,8 +94,7 @@ app.post('/probability', (req, res) => {
     let location = req.body.location;
     let temp = req.body.temp;
 
-    //this code in express app.
-    // 3, 'Low', 'Exmouth', 8
+    // Dummy data to use - 3, 'Low', 'Exmouth', 8
     inputData(month, tide, location, temp).then((fromResolve) => {
         res.send(fromResolve);
     }).catch((formReject) => {
