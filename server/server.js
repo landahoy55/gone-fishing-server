@@ -86,7 +86,7 @@ app.get('/locations/:id', (req, res) => {
 })
 
 
-//Get synapticjs assessment - liklihood of catching
+//Get synapticjs assessment - liklihood of catching.
 app.post('/probability', (req, res) => {
     
     let month = req.body.month;
